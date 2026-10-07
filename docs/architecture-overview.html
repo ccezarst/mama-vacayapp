@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Vaction App — how the pieces fit</title>
+<style>
+  @page { size: A4; margin: 18mm 16mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    color: #1a1a1a;
+    line-height: 1.45;
+    font-size: 11pt;
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 24px;
+  }
+  h1 { font-size: 22pt; margin: 0 0 8px; font-weight: 650; }
+  h2 { font-size: 14pt; margin: 28px 0 10px; font-weight: 650; border-bottom: 1px solid #ddd; padding-bottom: 6px; }
+  h3 { font-size: 11.5pt; margin: 16px 0 8px; font-weight: 600; }
+  p { margin: 0 0 10px; }
+  .muted { color: #555; }
+  .small { font-size: 10pt; }
+  .callout {
+    background: #eef4fb;
+    border-left: 3px solid #3b7dd8;
+    padding: 10px 12px;
+    margin: 12px 0;
+    border-radius: 0 6px 6px 0;
+  }
+  .callout.neutral {
+    background: #f4f4f4;
+    border-left-color: #888;
+  }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 10px 0; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 10px 0; }
+  .card {
+    border: 1px solid #d0d0d0;
+    border-radius: 8px;
+    padding: 12px;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .card h4 {
+    margin: 0 0 8px;
+    font-size: 11pt;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .pill {
+    display: inline-block;
+    font-size: 8.5pt;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: #e8e8e8;
+    white-space: nowrap;
+  }
+  .pill.info { background: #dce9f8; color: #1a4f8a; }
+  .pill.success { background: #d9f0e0; color: #1a5c32; }
+  .pill.warning { background: #f8ecd0; color: #7a5a10; }
+  .pill.deleted { background: #f5d9d9; color: #7a2020; }
+  .pill.neutral { background: #e8e8e8; color: #333; }
+  .flow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 6px;
+    border: 1px solid #d0d0d0;
+    border-radius: 8px;
+    padding: 14px;
+    margin: 10px 0;
+    justify-content: space-between;
+  }
+  .flow-node {
+    flex: 1 1 110px;
+    min-width: 100px;
+    border: 1px solid #c8c8c8;
+    border-radius: 6px;
+    padding: 10px 8px;
+    text-align: center;
+    background: #fafafa;
+  }
+  .flow-node.accent { border: 2px solid #3b7dd8; }
+  .flow-node strong { display: block; font-size: 10.5pt; }
+  .flow-node span { display: block; font-size: 8.5pt; color: #555; margin-top: 4px; }
+  .flow-arrow { align-self: center; color: #888; font-size: 14pt; flex: 0 0 auto; }
+  .journey { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 10px 0; }
+  ul.compact { margin: 0; padding-left: 18px; }
+  ul.compact li { margin: 3px 0; }
+  .section { margin-bottom: 8px; }
+  @media print {
+    body { padding: 0; }
+    .card, .callout, .flow { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+  <h1>Vaction App — how the pieces fit</h1>
+  <p class="muted">A plain-language map of what the product is made of. No jargon — think of screens people use, a brain that applies the rules, and a filing cabinet that remembers everything.</p>
+
+  <div class="callout">
+    This is a vacation-management product for a company: staff request time off, teammates cover and approve it, and organization admins keep the workplace structure tidy. Everything important is written down in a shared filing cabinet so it survives after someone closes the browser.
+  </div>
+
+  <h2>Big picture flow</h2>
+  <p class="muted small">Left to right: from a person using the app to the lasting records of what happened. The screens never invent the rules — they ask the brain, which reads and updates the filing cabinet.</p>
+  <div class="flow">
+    <div class="flow-node"><strong>People</strong><span>Admins &amp; employees</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node"><strong>Screens</strong><span>What they see &amp; click</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node"><strong>Front door</strong><span>Checks who is signed in</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node accent"><strong>Business brain</strong><span>Rules &amp; decisions</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node"><strong>Records</strong><span>Long-term memory</span></div>
+  </div>
+
+  <h2>Two ways in</h2>
+  <p class="muted">The home screen offers two separate doorways. Someone can stay signed in as both at once — admin for company setup, employee for day-to-day leave.</p>
+  <div class="grid2">
+    <div class="card">
+      <h4>Organization desk <span class="pill info">Admin</span></h4>
+      <p>For the person who runs the company account in this app.</p>
+      <p class="muted small">Set up the organization, add and edit people, watch vacation overviews, keep billing details on file, and browse an activity history of what changed.</p>
+    </div>
+    <div class="card">
+      <h4>Staff workspace <span class="pill success">Employee</span></h4>
+      <p>For people who take and approve time off day to day.</p>
+      <p class="muted small">Request vacation, review teammates’ requests (when allowed), join or manage groups, update their own account details, and see a timeline of leave across the team.</p>
+    </div>
+  </div>
+
+  <h2>What each layer is for</h2>
+  <div class="grid3">
+    <div class="card">
+      <h4>Screens (frontend)</h4>
+      <p class="small">The pages and buttons people interact with — home choice, admin desk, and employee workspace, plus shared helpers for sign-in status and messages.</p>
+      <p class="muted small">Role: show information clearly and collect what the person wants to do. Does not decide the rules alone.</p>
+    </div>
+    <div class="card">
+      <h4>Business brain (backend)</h4>
+      <p class="small">The shared rules of the product: who may do what, how a vacation moves from request to decision, how groups and organizations relate, and how sign-in is checked.</p>
+      <p class="muted small">Role: decide, enforce permissions, keep every action consistent, then ask the filing cabinet to save the result.</p>
+    </div>
+    <div class="card">
+      <h4>Records (memory)</h4>
+      <p class="small">A durable filing cabinet of folders (tables of information) for people, groups, vacations, sign-in, and history — so nothing is forgotten after the browser closes.</p>
+      <p class="muted small">Role: lasting truth the brain reads and updates. See the dedicated storage section below.</p>
+    </div>
+  </div>
+
+  <h2>Ideas the product is built around</h2>
+  <p class="muted">Everything in the app hangs off a small set of everyday concepts. Each concept has a matching place in storage.</p>
+  <div class="grid2">
+    <div class="card">
+      <h4>Organization</h4>
+      <p class="small">The company (or workplace) account. One place that owns the employee list, groups, and vacation activity. Named and linked to an owning admin account.</p>
+    </div>
+    <div class="card">
+      <h4>Employees</h4>
+      <p class="small">The people who request and cover time off. Each has a profile (name, email), optional group memberships, personal permission switches, and a login.</p>
+    </div>
+    <div class="card">
+      <h4>Admin users</h4>
+      <p class="small">Separate from employees: the accounts used at the organization desk. Tied to one organization and their own login details.</p>
+    </div>
+    <div class="card">
+      <h4>Groups</h4>
+      <p class="small">Teams inside the organization. Membership and per-member powers (approve leave, edit the team, add or remove people) are stored separately so rules can differ by group.</p>
+    </div>
+    <div class="card">
+      <h4>Vacations</h4>
+      <p class="small">A stretch of time off with dates, optional notes, status (waiting / approved / denied), and who approved, denied, or covers the work. Groups may also record their own vote on a request.</p>
+    </div>
+    <div class="card">
+      <h4>Permissions</h4>
+      <p class="small">Switches for request leave, approve others or yourself, edit or delete vacations, create groups, or change your own account — stored per employee, plus extra switches per group membership.</p>
+    </div>
+    <div class="card">
+      <h4>Activity history</h4>
+      <p class="small">A running diary of important moments (who did what, related to which person or vacation), so admins and staff can see what changed and when.</p>
+    </div>
+    <div class="card">
+      <h4>Sign-in sessions</h4>
+      <p class="small">After a successful login, the product remembers that this browser is allowed in — separately for admin and employee, so both doorways can stay open at once.</p>
+    </div>
+  </div>
+
+  <h2>How data is stored</h2>
+  <p class="muted">Think of a shared filing cabinet with labeled folders. Every lasting fact the product needs lives in one of these folders. The screens and brain do not keep the company truth only in memory on the computer running the page — they write it into this cabinet and read it back later.</p>
+
+  <div class="callout">
+    There is one main cabinet for the product. A demo / prototype setup can use its own cabinet on the same filing system so experiments do not mix with production records. A few demo-only extras (such as mock billing details) may sit in a temporary overlay until they are also filed permanently.
+  </div>
+
+  <h3>How the folders relate</h3>
+  <p class="small">Organization sits at the center. Employees and admin users hang under it. Groups hang under the organization and list which employees belong. Vacations hang under employees. Permissions hang under employees (and again under group membership). History and sign-in sit alongside as supporting folders.</p>
+
+  <div class="grid2">
+    <div class="card">
+      <h4>People &amp; workplace</h4>
+      <ul class="compact small">
+        <li>Organizations — name and who owns the account</li>
+        <li>Employees — display name and email</li>
+        <li>Who works where — which employees belong to which organization</li>
+        <li>Admin users — email linked to an organization</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>Teams &amp; powers</h4>
+      <ul class="compact small">
+        <li>Groups — team name inside an organization</li>
+        <li>Group members — who is on each team</li>
+        <li>Employee-wide permissions — what this person may do in general</li>
+        <li>Group-member permissions — extra powers only inside that team</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>Time off</h4>
+      <ul class="compact small">
+        <li>Vacations — who, start/end dates, notes, status, and who approved / denied / covers</li>
+        <li>Group votes on a vacation — each relevant team’s pending / decided answer, and who decided</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>Access &amp; history</h4>
+      <ul class="compact small">
+        <li>Admin logins — email and password for the organization desk</li>
+        <li>Employee logins — email and password for the staff workspace</li>
+        <li>Active sessions — “this browser is signed in as …” (admin and/or employee)</li>
+        <li>Events — dated diary entries of important actions</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>What gets written when something happens</h3>
+  <div class="card section">
+    <h4>Someone signs in</h4>
+    <p class="small">The brain checks the matching login folder (admin or employee). If the details match, it adds a session record and the browser keeps a small “ticket” so later visits know who is signed in — without storing the password in the ticket.</p>
+  </div>
+  <div class="card section">
+    <h4>An employee is added</h4>
+    <p class="small">A new employee profile is filed, linked to the organization, given default permission switches, and (when a password is set) a login row is created so they can use the staff doorway.</p>
+  </div>
+  <div class="card section">
+    <h4>A vacation is requested</h4>
+    <p class="small">A vacation row is created with dates and “waiting” status. An event is appended to the diary. Related groups may get pending vote rows so teammates can approve or deny from their side.</p>
+  </div>
+  <div class="card section">
+    <h4>A vacation is approved or denied</h4>
+    <p class="small">The vacation row’s status and decision fields are updated (who approved or denied, and who covers if approved). Group vote rows are updated when a team decides. Another diary event is written so the history stays complete.</p>
+  </div>
+
+  <div class="callout neutral">
+    Billing details shown in the admin desk may be demo placeholders kept only while the demo is running — not the same permanent folders as people and vacations, unless later promoted into lasting storage.
+  </div>
+
+  <h2>A vacation’s journey</h2>
+  <p class="muted">The heart of the product is this simple story, repeated for every request — and each step leaves a trace in storage.</p>
+  <div class="journey">
+    <span class="pill neutral">Employee asks for dates</span>
+    <span class="muted">→</span>
+    <span class="pill warning">Waiting for a decision</span>
+    <span class="muted">→</span>
+    <span class="pill success">Approved (with coverage)</span>
+    <span class="muted">or</span>
+    <span class="pill deleted">Denied</span>
+  </div>
+  <div class="callout neutral">
+    Who is allowed to approve depends on permissions and group roles — not on a single fixed manager for everyone. Decisions can also be recorded per group when several teams are involved.
+  </div>
+
+  <h2>How the two “sides” of the product relate</h2>
+  <div class="grid2">
+    <div class="card">
+      <h4>What people face</h4>
+      <ul class="compact small">
+        <li>Home: pick Admin or Employee</li>
+        <li>Admin screens: org, people, billing, history</li>
+        <li>Employee screens: my leave, approvals, groups, settings</li>
+        <li>Shared helpers: sign-in status, messages, date display</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>What works behind the scenes</h4>
+      <ul class="compact small">
+        <li>Sign-in and “who am I?” checks</li>
+        <li>Organizations, users, employees, groups</li>
+        <li>Vacation create / approve / deny / edit</li>
+        <li>Permission checks before sensitive actions</li>
+        <li>Writing and reading the lasting filing cabinet</li>
+      </ul>
+    </div>
+  </div>
+  <p class="muted small">The screens never invent the rules themselves — they ask the business brain, which consults the records and answers with yes, no, or updated information that has already been filed away.</p>
+
+</body>
+</html>

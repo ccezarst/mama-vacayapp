@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Employee · Vaction App</title>
+  <link rel="stylesheet" href="/static/app.css">
+</head>
+<body class="employee-body">
+  <header class="employee-header">
+    <div class="employee-brand">
+      <h1>Employee</h1>
+      <p class="subtitle"><a href="/">← Home</a> · Team schedule</p>
+    </div>
+    <div id="header-actions" class="header-actions hidden">
+      <button type="button" id="open-vacations-panel" class="btn-secondary btn-small">My vacations</button>
+      <button type="button" id="open-settings-panel" class="btn-secondary btn-small">Settings</button>
+      <button
+        type="button"
+        id="open-approvals-panel"
+        class="icon-btn header-bell-btn hidden"
+        title="Pending approvals"
+        aria-label="Pending approvals"
+      >
+        <svg class="icon-bell" viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            fill="currentColor"
+            d="M12 22a2.2 2.2 0 0 0 2.2-2.2h-4.4A2.2 2.2 0 0 0 12 22zm6.6-6.2V11a6.6 6.6 0 0 0-5.5-6.5V3.8a1.1 1.1 0 1 0-2.2 0v.7A6.6 6.6 0 0 0 5.4 11v4.8L4 17.2v.9h16v-.9l-1.4-1.4z"
+          />
+        </svg>
+        <span id="approvals-count" class="icon-btn-badge hidden">0</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="employee-main">
+    <section id="login-panel" class="card login-card">
+      <h2>Sign in as employee</h2>
+      <p class="muted">Request vacations, approve team requests, and manage groups when allowed.</p>
+      <form id="login-form">
+        <div class="grid-2">
+          <div class="field">
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" required autocomplete="username" placeholder="bob@test.com">
+          </div>
+          <div class="field">
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password" required autocomplete="current-password" placeholder="demo">
+          </div>
+        </div>
+        <p id="login-error" class="field-error hidden"></p>
+        <div class="btn-row">
+          <button type="submit" class="btn-primary">Sign in</button>
+          <button type="button" id="fill-demo" class="btn-secondary">Fill demo account</button>
+        </div>
+      </form>
+    </section>
+
+    <section id="login-failed-panel" class="card login-failed-card hidden" aria-live="polite">
+      <div class="login-failed-icon" aria-hidden="true">!</div>
+      <h2>Sign in failed</h2>
+      <p class="muted">We couldn't sign you in with those credentials.</p>
+      <p id="login-failed-message" class="login-failed-message"></p>
+      <div class="btn-row">
+        <button type="button" id="login-retry" class="btn-primary">Try again</button>
+        <button type="button" id="fill-demo-failed" class="btn-secondary">Fill demo account</button>
+      </div>
+    </section>
+
+    <section id="app-panel" class="app-shell hidden">
+      <div class="card timeline-card timeline-card-fill">
+        <div class="timeline-toolbar">
+          <div>
+            <h2>Team schedule</h2>
+            <p class="muted section-note">Scroll sideways to browse dates. Use Request vacation to pick a range.</p>
+          </div>
+          <div class="timeline-controls">
+            <button type="button" id="timeline-prev" class="btn-secondary btn-small" title="Earlier dates">← Earlier</button>
+            <button type="button" id="timeline-today" class="btn-secondary btn-small">Today</button>
+            <button type="button" id="timeline-next" class="btn-secondary btn-small" title="Later dates">Later →</button>
+            <button type="button" id="open-vacation-request" class="btn-primary btn-small hidden">Request vacation</button>
+          </div>
+        </div>
+        <div class="timeline-legend" id="timeline-legend">
+          <span data-status-legend><i class="legend-swatch approved"></i> Approved</span>
+          <span data-status-legend><i class="legend-swatch pending"></i> Pending</span>
+          <span data-status-legend><i class="legend-swatch denied"></i> Denied</span>
+          <span class="timeline-range-label muted" id="timeline-range-label"></span>
+        </div>
+        <div class="timeline-viewport timeline-viewport-fill">
+          <div class="timeline-names">
+            <div class="timeline-names-header">Employee</div>
+            <div id="timeline-name-rows" class="timeline-name-rows"></div>
+          </div>
+          <div class="timeline-pane" id="timeline-pane">
+            <div id="timeline-days" class="timeline-days"></div>
+            <div id="timeline-rows" class="timeline-rows"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- My vacations slide-over -->
+  <div id="vacations-panel" class="side-panel hidden" aria-hidden="true">
+    <div class="side-panel-backdrop" data-close-vacations-panel></div>
+    <aside class="side-panel-sheet card" role="dialog" aria-modal="true" aria-labelledby="vacations-panel-title">
+      <div class="modal-header">
+        <div>
+          <h2 id="vacations-panel-title">My vacations</h2>
+          <p class="muted">Your requested vacation history</p>
+        </div>
+        <button type="button" class="modal-close" data-close-vacations-panel aria-label="Close">×</button>
+      </div>
+      <div id="my-vacations-grid" class="vacation-card-grid"></div>
+    </aside>
+  </div>
+
+  <!-- Approvals popup (checkmark) — only for approvers -->
+  <div id="approvals-panel" class="settings-overlay hidden" aria-hidden="true">
+    <div class="settings-backdrop" data-close-approvals-panel></div>
+    <div class="settings-sheet card approvals-sheet" role="dialog" aria-modal="true" aria-labelledby="approvals-panel-title">
+      <div class="modal-header">
+        <div>
+          <h2 id="approvals-panel-title">Pending approvals</h2>
+          <p class="muted">Review waiting vacation requests</p>
+        </div>
+        <button type="button" class="modal-close" data-close-approvals-panel aria-label="Close">×</button>
+      </div>
+      <div id="approvals-grid" class="vacation-card-grid"></div>
+      <p id="approvals-empty" class="muted hidden">No waiting vacations to review.</p>
+    </div>
+  </div>
+
+  <!-- Settings popover panel (iOS-style hierarchy) -->
+  <div id="settings-panel" class="settings-overlay hidden" aria-hidden="true">
+    <div class="settings-backdrop" data-close-settings></div>
+    <div class="settings-sheet card" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+      <div class="settings-nav">
+        <button type="button" id="settings-back" class="settings-back hidden" data-settings-back aria-label="Back to Settings">
+          <span class="settings-back-chevron" aria-hidden="true">‹</span>
+          Settings
+        </button>
+        <h2 id="settings-title">Settings</h2>
+        <button type="button" class="modal-close" data-close-settings aria-label="Close">×</button>
+      </div>
+
+      <div class="settings-sheet-body">
+      <!-- Root list -->
+      <div class="settings-view" data-settings-view="root">
+        <button type="button" class="ios-profile-row" data-settings-open="account">
+          <div id="settings-root-avatar" class="account-avatar account-avatar-sm" aria-hidden="true">?</div>
+          <div class="ios-profile-text">
+            <strong id="settings-root-name">—</strong>
+            <span id="settings-root-email" class="muted">Account Settings</span>
+          </div>
+          <span class="ios-chevron" aria-hidden="true">›</span>
+        </button>
+
+        <p class="ios-section-label">Organization</p>
+        <div class="ios-settings-group">
+          <button type="button" id="settings-open-groups" class="ios-settings-row" data-settings-open="groups">
+            <span class="ios-row-icon ios-row-icon-groups" aria-hidden="true"></span>
+            <span class="ios-row-label">My Groups</span>
+            <span class="ios-chevron" aria-hidden="true">›</span>
+          </button>
+        </div>
+
+        <p class="ios-section-label">Display</p>
+        <div class="ios-settings-group">
+          <label class="ios-settings-row ios-settings-toggle" for="color-match-groups">
+            <span class="ios-row-icon ios-row-icon-display" aria-hidden="true"></span>
+            <span class="ios-row-label">Color match groups</span>
+            <input id="color-match-groups" type="checkbox">
+          </label>
+        </div>
+      </div>
+
+      <!-- Account Settings -->
+      <div class="settings-view hidden" data-settings-view="account">
+        <div class="account-hero">
+          <button type="button" id="account-avatar-btn" class="account-avatar-btn" aria-label="Change profile picture">
+            <div id="account-avatar" class="account-avatar" aria-hidden="true">?</div>
+            <span class="account-avatar-badge" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                <circle cx="12" cy="13" r="4"/>
+              </svg>
+            </span>
+          </button>
+          <input
+            id="account-avatar-input"
+            class="account-avatar-input"
+            name="avatar"
+            type="file"
+            accept="image/*"
+            tabindex="-1"
+            aria-hidden="true"
+          >
+          <div class="account-hero-text">
+            <h3 id="account-name">—</h3>
+            <p id="account-email" class="muted">—</p>
+            <div id="account-photo-actions" class="account-photo-actions">
+              <button type="button" id="account-remove-avatar" class="btn-secondary btn-small hidden">Remove</button>
+            </div>
+            <p class="muted section-note account-photo-hint">On phones: take a photo or choose from your gallery.</p>
+          </div>
+        </div>
+        <p class="ios-section-label">Profile</p>
+        <div class="ios-settings-group">
+          <div class="ios-static-block">
+            <form id="account-form">
+              <div class="field">
+                <label for="account-username">Username</label>
+                <input id="account-username" name="username" required maxlength="120" autocomplete="username">
+              </div>
+              <div class="field">
+                <label for="account-email-input">Email</label>
+                <input id="account-email-input" name="email" type="email" required maxlength="200" autocomplete="email">
+              </div>
+              <div class="btn-row" style="margin:0 0 0.65rem">
+                <button type="button" id="toggle-password-change" class="btn-secondary btn-small">Change password</button>
+              </div>
+              <div id="password-change-fields" class="password-change-fields hidden">
+                <div class="field">
+                  <label for="account-password-email">Email for password change</label>
+                  <input id="account-password-email" name="password_email" type="email" maxlength="200" autocomplete="email" placeholder="Where to send confirmation">
+                </div>
+                <div class="field">
+                  <label for="account-password">New password</label>
+                  <input id="account-password" name="password" type="password" autocomplete="new-password" placeholder="Enter a new password">
+                </div>
+              </div>
+            </form>
+            <p id="account-readonly-note" class="muted hidden" style="margin:0">You do not have permission to edit your account.</p>
+          </div>
+        </div>
+        <p class="ios-section-label">Details</p>
+        <div class="ios-settings-group">
+          <div id="profile-summary" class="ios-static-block muted">Loading…</div>
+        </div>
+        <p class="ios-section-label">Your permissions</p>
+        <div class="ios-settings-group">
+          <div id="permissions-summary" class="ios-static-block muted">Loading…</div>
+        </div>
+        <p class="ios-section-label">Session</p>
+        <div class="ios-settings-group">
+          <div class="ios-static-block">
+            <div class="btn-row" style="margin:0">
+              <button id="logout-btn" type="button" class="btn-danger">Sign out</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- My Groups -->
+      <div class="settings-view hidden" data-settings-view="groups">
+        <div class="card settings-org-card">
+          <div class="section-head">
+            <div>
+              <h2>My groups</h2>
+              <p class="muted section-note" id="groups-org-summary">Groups you belong to.</p>
+            </div>
+            <button type="button" id="emp-toggle-create-group" class="btn-secondary btn-small hidden">+ Add group</button>
+          </div>
+          <div class="card hidden" id="emp-create-group-card" style="margin-bottom:0.85rem">
+            <h3 class="org-section-title">Add group</h3>
+            <p class="muted section-note">Create a new group for this organization.</p>
+            <form id="emp-create-group-form">
+              <div class="field">
+                <label for="emp-new-group-name">Group name</label>
+                <input id="emp-new-group-name" name="name" required maxlength="120" placeholder="Team name">
+              </div>
+              <button type="submit" class="btn-primary">Create group</button>
+            </form>
+          </div>
+          <div class="field">
+            <label for="emp-groups-search">Search groups</label>
+            <input id="emp-groups-search" type="search" placeholder="Filter by name…" autocomplete="off">
+          </div>
+          <div id="emp-groups-list" class="org-scroll-list my-groups-list"></div>
+
+          <div id="emp-employees-section" class="hidden">
+            <hr class="soft-rule">
+            <div class="section-head">
+              <div>
+                <h3 class="org-section-title">Employee permissions</h3>
+                <p class="muted section-note">Search and open settings to edit global permissions.</p>
+              </div>
+            </div>
+            <div class="field">
+              <label for="emp-employees-search">Search employees</label>
+              <input id="emp-employees-search" type="search" placeholder="Filter by name or email…" autocomplete="off">
+            </div>
+            <div id="emp-employees-list" class="org-scroll-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Single group detail -->
+      <div class="settings-view hidden" data-settings-view="group-detail">
+        <div id="my-group-detail"></div>
+      </div>
+      </div>
+
+      <div id="account-save-bar" class="account-save-bar hidden">
+        <button type="submit" form="account-form" id="account-save-btn" class="btn-primary">Save details</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Employee global permissions modal -->
+  <div id="employee-perms-modal" class="modal hidden" aria-hidden="true">
+    <div class="modal-backdrop" data-close-employee-perms></div>
+    <div class="modal-panel card" role="dialog" aria-modal="true" aria-labelledby="employee-perms-title">
+      <div class="modal-header">
+        <div>
+          <h2 id="employee-perms-title">Employee permissions</h2>
+          <p id="employee-perms-subtitle" class="muted"></p>
+        </div>
+        <button type="button" class="modal-close" data-close-employee-perms aria-label="Close">×</button>
+      </div>
+      <form id="permissions-form">
+        <p class="muted section-note">Organization-wide rights. Group-specific rights are set inside each group.</p>
+        <div data-permission-checkboxes></div>
+        <input type="hidden" id="perm-employee-id" name="employee_id">
+        <div class="btn-row"><button type="submit" class="btn-primary">Save permissions</button></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Single group edit modal -->
+  <div id="group-edit-modal" class="modal hidden" aria-hidden="true">
+    <div class="modal-backdrop" data-close-group-edit></div>
+    <div class="modal-panel card groups-center-panel" role="dialog" aria-modal="true" aria-labelledby="group-edit-title">
+      <div class="modal-header">
+        <div>
+          <h2 id="group-edit-title">Edit group</h2>
+          <p id="group-edit-subtitle" class="muted"></p>
+        </div>
+        <button type="button" class="modal-close" data-close-group-edit aria-label="Close">×</button>
+      </div>
+      <div id="group-edit-body"></div>
+    </div>
+  </div>
+
+  <!-- Member group permissions modal -->
+  <div id="member-perms-modal" class="modal hidden" aria-hidden="true">
+    <div class="modal-backdrop" data-close-member-perms></div>
+    <div class="modal-panel card" role="dialog" aria-modal="true" aria-labelledby="member-perms-title">
+      <div class="modal-header">
+        <div>
+          <h2 id="member-perms-title">Member permissions</h2>
+          <p id="member-perms-subtitle" class="muted"></p>
+        </div>
+        <button type="button" class="modal-close" data-close-member-perms aria-label="Close">×</button>
+      </div>
+      <div id="member-perms-body"></div>
+    </div>
+  </div>
+
+  <div id="vacation-request-modal" class="request-dock hidden" aria-hidden="true">
+    <div class="request-dock-panel card" role="dialog" aria-labelledby="vacation-modal-title">
+      <div class="modal-header">
+        <div>
+          <h2 id="vacation-modal-title">New vacation request</h2>
+          <p class="muted">Drag the blue range on the schedule, or set dates below.</p>
+        </div>
+        <button type="button" class="modal-close" id="vacation-modal-close" aria-label="Close">×</button>
+      </div>
+      <form id="vacation-form">
+        <div class="field">
+          <label for="vacation-start">Start date</label>
+          <input id="vacation-start" name="start" type="date" required>
+        </div>
+        <div class="field">
+          <label for="vacation-end">End date</label>
+          <input id="vacation-end" name="end" type="date" required>
+        </div>
+        <div class="field">
+          <label for="vacation-details">Details</label>
+          <textarea id="vacation-details" name="details" rows="3" placeholder="Optional notes for this request"></textarea>
+        </div>
+        <p id="vacation-date-hint" class="field-error hidden"></p>
+        <div class="btn-row">
+          <button type="submit" class="btn-primary">Submit request</button>
+          <button type="button" class="btn-secondary" data-close-vacation-modal>Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="vacation-detail-modal" class="modal hidden" aria-hidden="true">
+    <div class="modal-backdrop" data-close-vacation-detail></div>
+    <div class="modal-panel card vacation-detail-panel" role="dialog" aria-modal="true" aria-labelledby="vacation-detail-title">
+      <div class="modal-header vacation-detail-header">
+        <div class="vacation-detail-identity">
+          <div id="vacation-detail-avatar" class="account-avatar account-avatar-sm" aria-hidden="true">?</div>
+          <div class="vacation-detail-identity-text">
+            <h2 id="vacation-detail-title">Vacation</h2>
+            <p id="vacation-detail-subtitle" class="muted"></p>
+          </div>
+        </div>
+        <button type="button" class="modal-close" data-close-vacation-detail aria-label="Close">×</button>
+      </div>
+      <nav class="tabs" id="vacation-detail-tabs">
+        <button type="button" class="tab active" data-detail-tab="overview">Overview</button>
+        <button type="button" class="tab" data-detail-tab="details">Details</button>
+        <button type="button" class="tab" data-detail-tab="activity">Activity</button>
+        <button type="button" class="tab" data-detail-tab="options">Options</button>
+      </nav>
+      <div class="detail-tab-panel" data-detail-panel="overview" id="vacation-detail-overview"></div>
+      <div class="detail-tab-panel hidden" data-detail-panel="details" id="vacation-detail-details"></div>
+      <div class="detail-tab-panel hidden" data-detail-panel="activity" id="vacation-detail-activity"></div>
+      <div class="detail-tab-panel hidden" data-detail-panel="options" id="vacation-detail-options"></div>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+  <script src="/static/common.js"></script>
+  <script src="/static/employee.js"></script>
+</body>
+</html>

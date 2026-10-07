@@ -1,0 +1,23 @@
+[database]
+database_url = "host=/var/run/postgresql dbname=mydb"
+database_name = "mydb"
+
+[auth]
+store_credentials = true
+
+[postgres]
+schema = "public"
+
+[vacation_db]
+auto_setup_auth = true
+
+[server]
+host = "0.0.0.0"
+port = 8080
+
+[email]
+smtp_host = "localhost"
+smtp_port = 1025
+from_address = "noreply@localhost"
+from_name = "Vaction App"
+tls = "none"

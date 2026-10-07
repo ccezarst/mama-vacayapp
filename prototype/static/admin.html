@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin · Vaction App</title>
+  <link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Admin</h1>
+      <p class="subtitle"><a href="/">← Home</a> · Organization management</p>
+    </div>
+    <div class="btn-row" style="margin:0">
+      <span id="session-badge" class="badge hidden"></span>
+      <button id="logout-btn" type="button" class="btn-secondary hidden">Sign out</button>
+    </div>
+  </header>
+
+  <main>
+    <section id="login-panel" class="card">
+      <h2>Sign in as admin</h2>
+      <p class="muted">Manage employees, billing, and organization settings.</p>
+      <form id="login-form">
+        <div class="grid-2">
+          <div class="field">
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" required autocomplete="username" placeholder="demo@test.com">
+          </div>
+          <div class="field">
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password" required autocomplete="current-password" placeholder="demo">
+          </div>
+        </div>
+        <p id="login-error" class="field-error hidden"></p>
+        <div class="btn-row">
+          <button type="submit" class="btn-primary">Sign in</button>
+          <button type="button" id="fill-demo" class="btn-secondary">Fill demo account</button>
+        </div>
+      </form>
+    </section>
+
+    <section id="login-failed-panel" class="card login-failed-card hidden" aria-live="polite">
+      <div class="login-failed-icon" aria-hidden="true">!</div>
+      <h2>Sign in failed</h2>
+      <p class="muted">We couldn't sign you in with those credentials.</p>
+      <p id="login-failed-message" class="login-failed-message"></p>
+      <div class="btn-row">
+        <button type="button" id="login-retry" class="btn-primary">Try again</button>
+        <button type="button" id="fill-demo-failed" class="btn-secondary">Fill demo account</button>
+      </div>
+    </section>
+
+    <section id="app-panel" class="hidden">
+      <nav class="tabs">
+        <button type="button" class="tab active" data-tab="overview">Overview</button>
+        <button type="button" class="tab" data-tab="organization">Organization</button>
+        <button type="button" class="tab" data-tab="vacations">Vacations</button>
+        <button type="button" class="tab" data-tab="events">Events</button>
+        <button type="button" class="tab" data-tab="payment">Billing</button>
+      </nav>
+
+      <div class="tab-panel" data-panel="overview">
+        <div class="card">
+          <h2>Organization</h2>
+          <div id="org-summary" class="muted">Loading…</div>
+        </div>
+        <div class="card">
+          <h2>Your account</h2>
+          <div id="user-summary" class="muted">Loading…</div>
+        </div>
+      </div>
+
+      <div class="tab-panel hidden" data-panel="organization">
+        <div class="card">
+          <h2>Organization details</h2>
+          <p class="muted section-note">Update the organization name and review its groups and people.</p>
+          <form id="org-details-form" class="org-details-form">
+            <div class="field">
+              <label for="org-name">Name</label>
+              <input id="org-name" name="name" required maxlength="120" placeholder="Organization name">
+            </div>
+            <p id="org-details-meta" class="muted"></p>
+            <button type="submit" class="btn-primary">Save details</button>
+          </form>
+
+          <hr class="soft-rule">
+
+          <div class="section-head">
+            <div>
+              <h3 class="org-section-title">Groups</h3>
+              <p class="muted section-note">Search and open settings to rename, manage members, or delete.</p>
+            </div>
+            <button type="button" id="toggle-create-group" class="btn-secondary btn-small">+ Add group</button>
+          </div>
+          <div class="card hidden" id="create-group-card" style="margin-bottom:0.85rem">
+            <h3 class="org-section-title">Add group</h3>
+            <p class="muted section-note">Create a new group for this organization.</p>
+            <form id="org-create-group-form">
+              <div class="field">
+                <label for="org-new-group-name">Group name</label>
+                <input id="org-new-group-name" name="name" required maxlength="120" placeholder="Team name">
+              </div>
+              <button type="submit" class="btn-primary">Create group</button>
+            </form>
+          </div>
+          <div class="field">
+            <label for="org-groups-search">Search groups</label>
+            <input id="org-groups-search" type="search" placeholder="Filter by name…" autocomplete="off">
+          </div>
+          <div id="org-groups-list" class="org-scroll-list"></div>
+
+          <hr class="soft-rule">
+
+          <div class="section-head">
+            <div>
+              <h3 class="org-section-title">Employees</h3>
+              <p class="muted section-note">Search and open settings to edit account, permissions, or groups.</p>
+            </div>
+            <button type="button" id="toggle-create" class="btn-secondary btn-small">+ Add employee</button>
+          </div>
+          <div class="card hidden" id="create-card" style="margin-bottom:0.85rem">
+            <h3 class="org-section-title">Add employee</h3>
+            <p class="muted section-note">They can sign in on the Employee portal with this email and password.</p>
+            <form id="employee-form">
+              <div class="grid-2">
+                <div class="field">
+                  <label for="emp-username">Name</label>
+                  <input id="emp-username" name="username" required placeholder="alice">
+                </div>
+                <div class="field">
+                  <label for="emp-email">Email</label>
+                  <input id="emp-email" name="email" type="email" required placeholder="alice@test.com">
+                </div>
+              </div>
+              <div class="field">
+                <label for="emp-password">Initial password</label>
+                <input id="emp-password" name="password" type="text" value="demo">
+              </div>
+              <button type="submit" class="btn-primary">Create employee</button>
+            </form>
+          </div>
+          <div class="field">
+            <label for="org-employees-search">Search employees</label>
+            <input id="org-employees-search" type="search" placeholder="Filter by name or email…" autocomplete="off">
+          </div>
+          <div id="org-employees-list" class="org-scroll-list"></div>
+        </div>
+      </div>
+
+      <div class="tab-panel hidden" data-panel="vacations">
+        <div class="card admin-vacations-card">
+          <div class="section-head">
+            <div>
+              <h2>Vacations</h2>
+              <p class="muted section-note">Organization schedule. Scroll sideways for dates; click a bar for details.</p>
+            </div>
+            <div class="timeline-controls">
+              <button type="button" id="admin-timeline-prev" class="btn-secondary btn-small" title="Previous vacation">← Previous</button>
+              <button type="button" id="admin-timeline-today" class="btn-secondary btn-small">Today</button>
+              <button type="button" id="admin-timeline-next" class="btn-secondary btn-small" title="Next vacation">Next →</button>
+              <button type="button" id="refresh-vacations" class="btn-secondary btn-small">Refresh</button>
+            </div>
+          </div>
+          <div class="grid-2 admin-vacations-filters">
+            <div class="field">
+              <label for="vacations-search">Search</label>
+              <input id="vacations-search" type="search" placeholder="Filter by employee or details…" autocomplete="off">
+            </div>
+            <div class="field">
+              <label for="vacations-status-filter">Status</label>
+              <select id="vacations-status-filter">
+                <option value="">All statuses</option>
+                <option value="Awaiting">Pending</option>
+                <option value="Approved">Approved</option>
+                <option value="CancellationRequested">Cancel pending</option>
+                <option value="Cancelled">Cancelled</option>
+                <option value="Denied">Denied</option>
+              </select>
+            </div>
+          </div>
+          <div class="timeline-legend admin-timeline-legend">
+            <span><i class="legend-swatch approved"></i> Approved</span>
+            <span><i class="legend-swatch pending"></i> Pending</span>
+            <span><i class="legend-swatch cancel-pending"></i> Cancel pending</span>
+            <span><i class="legend-swatch denied"></i> Denied</span>
+            <span><i class="legend-swatch cancelled"></i> Cancelled</span>
+            <span class="timeline-range-label muted" id="admin-timeline-range-label"></span>
+          </div>
+          <div class="timeline-viewport timeline-compact" id="admin-timeline-viewport">
+            <div class="timeline-names" id="admin-timeline-names">
+              <div class="timeline-names-header">Employee</div>
+              <div id="admin-timeline-name-rows" class="timeline-name-rows"></div>
+            </div>
+            <div class="timeline-pane" id="admin-timeline-pane">
+              <div id="admin-timeline-days" class="timeline-days"></div>
+              <div id="admin-timeline-rows" class="timeline-rows"></div>
+            </div>
+          </div>
+          <p id="admin-vacations-empty" class="muted hidden">No vacation requests match this filter.</p>
+        </div>
+      </div>
+
+      <div class="tab-panel hidden" data-panel="events">
+        <div class="card">
+          <div class="section-head">
+            <div>
+              <h2>Event log</h2>
+              <p class="muted section-note">All vacation activity across the organization.</p>
+            </div>
+            <button type="button" id="refresh-events" class="btn-secondary btn-small">Refresh</button>
+          </div>
+          <div class="field" style="max-width:240px">
+            <label for="events-filter">Filter by type</label>
+            <select id="events-filter">
+              <option value="">All events</option>
+              <option value="vacation_request">Requested</option>
+              <option value="vacation_approval">Approved</option>
+              <option value="vacation_denial">Denied</option>
+              <option value="vacation_group_vote">Group vote</option>
+              <option value="vacation_modified">Edited</option>
+              <option value="vacation_deleted">Deleted</option>
+              <option value="vacation_cancellation_requested">Cancellation requested</option>
+              <option value="vacation_cancellation_approved">Cancellation accepted</option>
+              <option value="vacation_cancellation_denied">Cancellation denied</option>
+              <option value="employee_added">Employee created</option>
+              <option value="employee_modified">Employee edited</option>
+              <option value="employee_deleted">Employee deleted</option>
+            </select>
+          </div>
+          <div id="events-list" class="event-list"></div>
+          <p id="events-empty" class="muted hidden">No events recorded yet.</p>
+        </div>
+      </div>
+
+      <div class="tab-panel hidden" data-panel="payment">
+        <div class="card">
+          <h2>Billing details</h2>
+          <p class="muted">Mock payment info for this organization admin account.</p>
+          <form id="payment-form">
+            <div class="field">
+              <label for="billing-name">Billing name</label>
+              <input id="billing-name" name="billing_name" required>
+            </div>
+            <div class="grid-2">
+              <div class="field">
+                <label for="card-last4">Card last 4 digits</label>
+                <input id="card-last4" name="card_last4" maxlength="4" pattern="[0-9]{4}" required>
+              </div>
+              <div class="field">
+                <label for="plan">Plan</label>
+                <select id="plan" name="plan">
+                  <option>Starter</option>
+                  <option>Business</option>
+                  <option>Enterprise</option>
+                </select>
+              </div>
+            </div>
+            <button type="submit" class="btn-primary">Save billing details</button>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="employee-modal" class="modal hidden" aria-hidden="true">
+    <div class="modal-backdrop" data-close-modal></div>
+    <div class="modal-panel card" role="dialog" aria-modal="true">
+      <div class="modal-header">
+        <div>
+          <h2 id="modal-title">Employee</h2>
+          <p id="modal-subtitle" class="muted"></p>
+        </div>
+        <button type="button" class="modal-close" id="modal-close" aria-label="Close">×</button>
+      </div>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <div id="vacation-detail-modal" class="modal hidden" aria-hidden="true">
+    <div class="modal-backdrop" data-close-vacation-modal></div>
+    <div class="modal-panel card" role="dialog" aria-modal="true">
+      <div class="modal-header">
+        <div>
+          <h2 id="vacation-detail-title">Vacation</h2>
+          <p id="vacation-detail-subtitle" class="muted"></p>
+        </div>
+        <button type="button" class="modal-close" id="vacation-detail-close" aria-label="Close">×</button>
+      </div>
+      <nav class="tabs" id="vacation-detail-tabs">
+        <button type="button" class="tab active" data-detail-tab="overview">Overview</button>
+        <button type="button" class="tab" data-detail-tab="details">Edit</button>
+        <button type="button" class="tab" data-detail-tab="activity">Activity</button>
+      </nav>
+      <div class="detail-tab-panel" data-detail-panel="overview" id="vacation-detail-overview"></div>
+      <div class="detail-tab-panel hidden" data-detail-panel="details" id="vacation-detail-details"></div>
+      <div class="detail-tab-panel hidden" data-detail-panel="activity" id="vacation-detail-activity"></div>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+  <script src="/static/common.js"></script>
+  <script src="/static/admin.js"></script>
+</body>
+</html>

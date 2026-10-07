@@ -1,0 +1,37 @@
+# Prototype demo configuration.
+# Same Postgres server as production (`server_configs.toml`), separate database.
+#
+# Create the DB once (as a Postgres admin) if the app role lacks CREATEDB:
+#   CREATE DATABASE vaction_app_prototype OWNER vaction;
+
+[database]
+database_url = "host=127.0.0.1 port=5432 user=vaction password=your_password dbname=vaction_app_prototype"
+database_name = "vaction_app_prototype"
+
+[auth]
+store_credentials = true
+
+[postgres]
+schema = "public"
+
+[vacation_db]
+auto_setup_auth = true
+
+[server]
+host = "0.0.0.0"
+port = 8080
+
+[prototype]
+backend_name = "prototype"
+
+# Outbound mail — employee email addresses are recipients only.
+# You still need a working SMTP relay here.
+#
+# Local catcher (MailCrab/MailHog): localhost:1025, tls = "none"
+# Real provider: set host/port/username/password and tls = "start_tls" or "tls"
+[email]
+smtp_host = "localhost"
+smtp_port = 1025
+from_address = "noreply@localhost"
+from_name = "Vaction App"
+tls = "none"
